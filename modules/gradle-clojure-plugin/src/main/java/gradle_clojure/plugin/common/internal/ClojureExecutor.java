@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
@@ -33,12 +35,18 @@ public final class ClojureExecutor {
   }
 
   public void exec(ClojureExecSpec cljSpec) {
+    InetSocketAddress addr = new InetSocketAddress("localhost", 0);
+    Future<Optional<Throwable>> error = waitForThrowable(addr);
+
     FileCollection fullClasspath = cljSpec.getClasspath().plus(resolve(tools()));
     project.javaexec(spec -> {
       spec.setMain("clojure.main");
-      spec.args("-m", cljSpec.getMain());
+      spec.args("-m", "gradle-clojure.tools.main");
 
-      String ednArgs = Edn.print(Arrays.asList(cljSpec.getArgs()));
+      String ednArgs = Edn.print(Arrays.asList(
+        addr.getPort(),
+        cljSpec.getNamespace(), cljsSpec.getNamespace(),
+        Arrays.asList(cljSpec.getArgs())));
       ByteArrayInputStream input = new ByteArrayInputStream(ednArgs.getBytes(StandardCharsets.UTF_8));
       spec.setStandardInput(input);
 
@@ -79,5 +87,9 @@ public final class ClojureExecutor {
     return Optional.ofNullable(project.findProperty("gradle-clojure.tools.logger.level"))
         .map(Object::toString)
         .orElseGet(gradleLevel);
+  }
+
+  private Future<Optional<Throwable>> waitForThrowable(SocketAddress addr) {
+
   }
 }

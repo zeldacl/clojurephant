@@ -11,7 +11,8 @@ import org.gradle.process.JavaForkOptions;
 
 public class ClojureExecSpec {
   private FileCollection classpath;
-  private String main;
+  private String namespace;
+  private String function;
   private Object[] args = new Object[0];
   private List<Action<JavaForkOptions>> configureFork = new ArrayList<>();
 
@@ -23,12 +24,20 @@ public class ClojureExecSpec {
     this.classpath = classpath;
   }
 
-  public String getMain() {
-    return main;
+  public String getNamespace() {
+    return namespace;
   }
 
-  public void setMain(String main) {
-    this.main = main;
+  public void setNamespace(String namespace) {
+    this.namespace = namespace;
+  }
+
+  public String getFunction() {
+    return function;
+  }
+
+  public void setFunction(String function) {
+    this.function = function;
   }
 
   public Object[] getArgs() {
