@@ -34,22 +34,22 @@ clojurescript {
   builds {
     main {
       compiler {
-          outputTo = 'public/js/main.js'
-          outputDir = 'public/js/out'
-          assetPath = 'js/out'
-          optimizations = 'advanced'
-          main = 'sample.main'
-          sourceMap = 'js/main.js.map'
-        }
+        outputTo = 'public/js/main.js'
+        outputDir = 'public/js/out'
+        assetPath = 'js/out'
+        optimizations = 'advanced'
+        main = 'sample.main'
+        sourceMap = 'js/main.js.map'
+      }
     }
     dev {
       compiler {
-          outputTo = 'js/main.js'
-          outputDir = 'public/js/out'
-          assetPath = 'js/out'
-          main = 'sample.main'
-          preloads = ['sample.dev']
-        }
+        outputTo = 'public/js/main.js'
+        outputDir = 'public/js/out'
+        assetPath = 'js/out'
+        main = 'sample.main'
+        preloads = ['sample.dev']
+      }
     }
   }
 }

@@ -24,6 +24,7 @@ dependencies {
   compatTestImplementation 'nrepl:nrepl:latest.release'
   compatTestImplementation 'junit:junit:latest.release'
   compatTestImplementation 'org.ajoberstar:ike.cljj:latest.release'
+  compatTestImplementation 'etaoin:etaoin:latest.release'
 }
 
 task writeProperties(type: WriteProperties) {
