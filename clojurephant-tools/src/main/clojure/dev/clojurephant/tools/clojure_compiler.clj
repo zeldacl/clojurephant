@@ -10,6 +10,7 @@
     (try
       (binding [*namespaces* (seq namespaces)
                 *compile-path* destination-dir
+                *warn-on-reflection* true
                 *compiler-options* options]
         (doseq [namespace namespaces]
           (log :info "Compiling %s" namespace)

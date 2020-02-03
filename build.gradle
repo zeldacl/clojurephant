@@ -71,22 +71,26 @@ allprojects {
     // Publish to following repositories
     publishing {
       repositories {
-        maven {
-          name = 'bintray'
-          url = 'https://api.bintray.com/maven/clojurephant/maven/clojurephant/;publish=1'
-          credentials {
-            username = System.env['BINTRAY_USER']
-            password = System.env['BINTRAY_KEY']
+//        maven {
+//          name = 'bintray'
+//          url = 'https://api.bintray.com/maven/clojurephant/maven/clojurephant/;publish=1'
+//          credentials {
+//            username = System.env['BINTRAY_USER']
+//            password = System.env['BINTRAY_KEY']
+//          }
+//        }
+//        maven {
+//          name = 'clojars'
+//          url = 'https://repo.clojars.org'
+//          credentials {
+//            username = System.env['CLOJARS_USER']
+//            password = System.env['CLOJARS_PASSWORD']
+//          }
+//        }
+          maven {
+              name = 'local'
+              url = uri('../repo')
           }
-        }
-        maven {
-          name = 'clojars'
-          url = 'https://repo.clojars.org'
-          credentials {
-            username = System.env['CLOJARS_USER']
-            password = System.env['CLOJARS_PASSWORD']
-          }
-        }
       }
       publications.withType(MavenPublication) {
         // use static versions in poms
