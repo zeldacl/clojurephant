@@ -79,6 +79,14 @@ plugins {
   id "dev.clojurephant.clojure" version "<version>"
 }
 
+// You need to add clojars for the plugin to work.
+repositories {
+  maven {
+    name = 'Clojars' // name can be ommitted, but is helpful in troubleshooting
+    url = 'https://repo.clojars.org/'
+  }
+}
+
 dependencies {
   // whatever version of clojure you prefer (versions before 1.8.0 may not be compatible)
   implementation 'org.clojure:clojure:1.10.0'
@@ -91,13 +99,16 @@ dependencies {
   // testImplementation 'group:artifact:version'
 
   // dependencies for REPL use only
-  devImplementation 'org.clojure:tools.namespace:0.3.0-alpha4'
+  devImplementation 'org.clojure:tools.namespace:1.0.0'
 }
 ```
 
 See all available options in the [docs](https://clojurephant.dev).
 
 ## Getting help
+
+
+Read the online Clojurephant documentation [https://clojurephant.dev](https://clojurephant.dev).
 
 For questions or support, please visit either the [ClojureVerse gradle-clojure channel](https://clojureverse.org/c/projects/gradle-clojure) or the [Clojurian's Slack #gradle channel](http://clojurians.net/)
 

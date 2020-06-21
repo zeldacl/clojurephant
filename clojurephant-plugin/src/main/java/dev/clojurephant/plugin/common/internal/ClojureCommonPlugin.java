@@ -22,8 +22,9 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.language.jvm.tasks.ProcessResources;
 
 public class ClojureCommonPlugin implements Plugin<Project> {
@@ -36,17 +37,17 @@ public class ClojureCommonPlugin implements Plugin<Project> {
     project.getPlugins().apply(ClojureBasePlugin.class);
     project.getPlugins().apply(JavaPlugin.class);
 
-    JavaPluginConvention javaConvention = project.getConvention().getPlugin(JavaPluginConvention.class);
-    configureDev(project, javaConvention);
+    SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
+    configureDev(project, sourceSets);
     configureDependencyConstraints(project);
 
-    configureDevSource(javaConvention, SourceSet::getResources);
+    configureDevSource(sourceSets, SourceSet::getResources);
   }
 
-  private void configureDev(Project project, JavaPluginConvention javaConvention) {
-    SourceSet main = javaConvention.getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-    SourceSet test = javaConvention.getSourceSets().getByName(SourceSet.TEST_SOURCE_SET_NAME);
-    SourceSet dev = javaConvention.getSourceSets().create(DEV_SOURCE_SET_NAME);
+  private void configureDev(Project project, SourceSetContainer sourceSets) {
+    SourceSet main = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+    SourceSet test = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME);
+    SourceSet dev = sourceSets.create(DEV_SOURCE_SET_NAME);
 
     Configuration nrepl = project.getConfigurations().create(NREPL_CONFIGURATION_NAME);
     project.getDependencies().add(NREPL_CONFIGURATION_NAME, "nrepl:nrepl:0.6.0");
@@ -80,12 +81,10 @@ public class ClojureCommonPlugin implements Plugin<Project> {
       devConf.extendsFrom(testConf);
     };
 
-    devExtendsTest.accept(SourceSet::getCompileConfigurationName);
     devExtendsTest.accept(SourceSet::getImplementationConfigurationName);
-    devExtendsTest.accept(SourceSet::getRuntimeConfigurationName);
     devExtendsTest.accept(SourceSet::getRuntimeOnlyConfigurationName);
 
-    Task repl = project.getTasks().create(NREPL_TASK_NAME, ClojureNRepl.class, task -> {
+    TaskProvider<ClojureNRepl> repl = project.getTasks().register(NREPL_TASK_NAME, ClojureNRepl.class, task -> {
       task.setGroup("run");
       task.setDescription("Starts an nREPL server.");
       task.setClasspath(dev.getRuntimeClasspath());
@@ -94,13 +93,14 @@ public class ClojureCommonPlugin implements Plugin<Project> {
     // if you only ask for the REPL task, don't pre-compile/check the Clojure code (besides the dev one
     // for the user namespace)
     project.getGradle().getTaskGraph().whenReady(graph -> {
-      if (!graph.hasTask(repl)) {
+      // using this string concat approach to avoid realizing the task provider, if it's not needed
+      if (!graph.hasTask(project.getPath() + NREPL_TASK_NAME)) {
         return;
       }
       Set<Task> selectedTasks = new HashSet<>(graph.getAllTasks());
 
       Queue<Task> toProcess = new LinkedList<>();
-      toProcess.add(repl);
+      toProcess.add(repl.get());
 
       Set<Task> toDisable = new HashSet<>();
 
@@ -132,17 +132,20 @@ public class ClojureCommonPlugin implements Plugin<Project> {
 
     if (JavaVersion.current().isJava9Compatible()) {
       project.getDependencies().constraints(constraints -> {
-        constraints.add("devRuntimeClasspath", "org.clojure:java.classpath:0.3.0", constraint -> {
+        constraints.add("devImplementation", "org.clojure:java.classpath:0.3.0", constraint -> {
+          constraint.because("Java 9 has a different classloader architecture. 0.3.0 adds support for this.");
+        });
+        constraints.add("devRuntimeOnly", "org.clojure:java.classpath:0.3.0", constraint -> {
           constraint.because("Java 9 has a different classloader architecture. 0.3.0 adds support for this.");
         });
       });
     }
   }
 
-  public static void configureDevSource(JavaPluginConvention javaConvention, Function<SourceSet, SourceDirectorySet> languageMapper) {
-    SourceSet main = javaConvention.getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-    SourceSet test = javaConvention.getSourceSets().getByName(SourceSet.TEST_SOURCE_SET_NAME);
-    SourceSet dev = javaConvention.getSourceSets().getByName(DEV_SOURCE_SET_NAME);
+  public static void configureDevSource(SourceSetContainer sourceSets, Function<SourceSet, SourceDirectorySet> languageMapper) {
+    SourceSet main = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+    SourceSet test = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME);
+    SourceSet dev = sourceSets.getByName(DEV_SOURCE_SET_NAME);
     languageMapper.apply(dev).source(languageMapper.apply(test));
     languageMapper.apply(dev).source(languageMapper.apply(main));
   }

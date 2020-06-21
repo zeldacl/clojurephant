@@ -50,7 +50,7 @@ See [Gradle's Introduction to Dependency Management](https://docs.gradle.org/cur
 
 No repositories are specified by default, so you must list any repositories you want to search for your dependencies.
 
-**IMPORTANT:** clojurephant currently requires `jcenter()` (or `mavenCentral()` and Clojars) be included in your repository list.
+**IMPORTANT:** clojurephant currently requires `jcenter()` (or `mavenCentral()`) and Clojars be included in your repository list.
 
 ```groovy
 repositories {
@@ -86,7 +86,7 @@ dependencies {
   testImplementation 'junit:junit:4.12'
 
   // due to the way Gradle's REPL is started, if you need tools.namespace, you must be on 0.3+
-  devImplementation 'org.clojure:tools.namespace:0.3.0-alpha4'
+  devImplementation 'org.clojure:tools.namespace:1.0.0'
 }
 ```
 
@@ -113,6 +113,6 @@ dependencies {
 
   testImplementation 'junit:junit:4.12'
 
-  devImplementation 'org.clojure:tools.namespace:0.3.0-alpha4'
+  devImplementation 'org.clojure:tools.namespace:1.0.0'
 }
 ```
